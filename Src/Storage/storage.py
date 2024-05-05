@@ -1,10 +1,15 @@
 import json
 import os
 
+
+from Src.settings import settings
 from Src.exceptions import operation_exception, exception_proxy
 from Src.Logics.convert_factory import convert_factory
 from Src.reference import reference
-
+from Src.log import log
+from Src.Models.event_type import event_type
+from Src.Logics.storage_observer import storage_observer
+from Src.Logics.loggingobs import loggingobs
 
 #
 # Класс хранилище данных
@@ -24,8 +29,9 @@ class storage():
         # Связка для всех моделей
         for  inheritor in reference.__subclasses__():
             self.__mapping[inheritor.__name__] = inheritor
+        self.logging_observer = loggingobs(settings)
+        storage_observer.register(self.logging_observer)
 
-    
     @property
     def data(self) -> dict:
         """
@@ -84,9 +90,14 @@ class storage():
                 data = factory.serialize( self.data )
                 json_text = json.dumps(data, sort_keys = True, indent = 4, ensure_ascii = False)  
                 write_file.write(json_text)
-                
+
+                storage_observer.raise_event(
+                    event_type.log_entry(log("INFO", "Data saved successfully to storage.json")))
+
                 return True
         except Exception as ex:
+            storage_observer.raise_event(
+                event_type.log_entry(log("ERROR", f"Error saving data to storage.json: {ex}")))
             raise operation_exception(f"Ошибка при записи файла {self.__storage_file}\n{ex}")
             
         return False    

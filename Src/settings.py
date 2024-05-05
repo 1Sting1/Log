@@ -12,6 +12,11 @@ class settings():
     _first_start = True
     _mode = "csv"
     _block_period = datetime.now
+    _log_levels = {
+        "reference_service": "DEBUG",
+        "storage_service": "DEBUG",
+        "main": "INFO",
+    }
     
     
     @property
