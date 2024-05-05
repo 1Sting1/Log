@@ -1,4 +1,8 @@
 import json
+from datetime import datetime
+from Src.Logics.storage_observer import storage_observer
+from Models.event_type import event_type
+from Src.log import Log
 
 #
 # Класс для обработки и хранения текстовой информации об ошибке
@@ -88,7 +92,10 @@ class error_proxy:
             response =   f"{json_text}",
             status = code,
             mimetype = "application/json; charset=utf-8"
-        )    
-        
+        )
+
+        log_entry = Log(category, message)
+        storage_observer.raise_event(event_type.log_entry(log_entry))
+
         return result
             
